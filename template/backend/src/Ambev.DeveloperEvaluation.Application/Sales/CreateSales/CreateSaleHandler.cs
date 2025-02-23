@@ -3,79 +3,82 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using MediatR;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using AutoMapper;
+using MediatR;
+using FluentValidation;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
 
-namespace Ambev.DeveloperEvaluation.Application.Sales
+public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
 {
-    public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
+    private readonly ISalesRepository _salesRepository;
+    private readonly IMapper _mapper;
+
+    // Constructor to inject dependencies
+    public CreateSaleHandler(ISalesRepository salesRepository, IMapper mapper)
     {
-        private readonly ISalesRepository _salesRepository;
-        private readonly IMapper _mapper;
+        _salesRepository = salesRepository;
+        _mapper = mapper;
+    }
 
-        // Constructor to inject dependencies
-        public CreateSaleHandler(ISalesRepository salesRepository, IMapper mapper)
+    // Handler to process the sale creation
+    public async Task<CreateSaleResult?> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
+    {
+        var validator = new CreateSaleCommandValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
+        var createdSales = new List<SalesEntity>();
+        
+        var codigoVenda = new Random().Next(100000, 999999).ToString(); // Changed to string
+
+        // Iterate over each item and create a separate sale for each one
+        foreach (var item in request.Items)
         {
-            _salesRepository = salesRepository;
-            _mapper = mapper;
-        }
+            if (item.Quantity > 20)
+                throw new Exception("It is not possible to sell more than 20 identical items.");
 
-        // Handler to process the sale creation
-        public async Task<CreateSaleResult> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
-        {
-            if (request.Items == null || !request.Items.Any())
-            {
-                throw new FluentValidation.ValidationException("Items cannot be null or empty.");
-            }
+            // Applying discount rules
+            item.Discount = item.Quantity >= 10 ? 20 :
+                            item.Quantity >= 4 ? 10 : 0;
 
-            // Applying quantity rules and discount calculation for each item
-            foreach (var item in request.Items)
-            {
-                // If quantity exceeds 20, throw an exception
-                if (item.Quantity > 20)
-                    throw new Exception("It is not possible to sell more than 20 identical items.");
+            // Calculate the total price of the item with the discount
+            item.TotalPrice = item.Quantity * item.UnitPrice * (1 - (item.Discount / 100m));
 
-                // Assigning discounts based on quantity
-                if (item.Quantity >= 10)
-                    item.Discount = 0.20m; // 20% discount
-                else if (item.Quantity >= 4)
-                    item.Discount = 0.10m; // 10% discount
-                else
-                    item.Discount = 0; // No discount
-
-                // Calculating the total price considering the discount
-                item.TotalPrice = item.Quantity * item.UnitPrice * (1 - item.Discount);
-            }
-
-            // Creating the sale object
+            
+            // Creating a separate sale for each item
             var sale = new SalesEntity
             {
-                // Assuming you are creating a new sale entity
                 Id = Guid.NewGuid(),
-                Productname = request.Productname,
-                UnitPrice = request.UnitPrice,
-                Discount = request.Discount,
-                Items = request.Items.Select(item => new ItemsEntity
-                {
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    Discount = item.Discount,
-                    TotalPrice = item.TotalPrice
-                }).ToList(),
-                TotalAmount = request.Items.Sum(i => i.TotalPrice),
+                ProductName = item.ProductName,
+                CodigoVenda = codigoVenda, // Store the string
+                Quantity = item.Quantity,
+                UnitPrice = item.UnitPrice,
+                Discount = item.Discount,
+                TotalAmount = item.TotalPrice, // TotalAmount now represents the total for a single item
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Saving the sale to the repository
+            // Saving to the repository
             var createdSale = await _salesRepository.CreateAsync(sale, cancellationToken);
-
-            // Mapping the result to the CreateSaleResult
-            var result = _mapper.Map<CreateSaleResult>(createdSale);
-
-            // Returning the result
-            return result;
+            createdSales.Add(createdSale);
         }
+
+        var result = new CreateSaleResult
+        {
+            CodigoVenda = codigoVenda.ToString(),
+            Items = createdSales.Select(sale => new SaleItem
+            {
+                ProductName = sale.ProductName,
+                Quantity = sale.Quantity,
+                UnitPrice = sale.UnitPrice,
+                Discount = sale.Discount,
+                TotalPrice = sale.Quantity * sale.UnitPrice * (1 - sale.Discount / 100m)
+            }).ToList()
+        };
+
+        // Returning the list of created sales (Only the first sale is returned for simplicity)
+        return result;
     }
 }

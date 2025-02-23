@@ -7,7 +7,12 @@ public class CreateSaleProfile : Profile
 {
     public CreateSaleProfile()
     {
-        CreateMap<CreateSalesRequest, CreateSaleCommand>();
+
+        CreateMap<SaleItemDto, SaleItem>();
+
+        CreateMap<CreateSalesRequest, CreateSaleCommand>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+        
         CreateMap<CreateSaleResult, CreateSaleResponse>();
     }
 }

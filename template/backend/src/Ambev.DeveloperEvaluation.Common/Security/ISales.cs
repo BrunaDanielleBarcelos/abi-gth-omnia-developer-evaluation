@@ -11,11 +11,13 @@
         /// <returns>The ID of the sale as a string.</returns>
         public Guid Id { get; }
 
+        public string CodigoVenda { get; }
+
         /// <summary>
         /// Gets the name of the product in the sale.
         /// </summary>
         /// <returns>The name of the product.</returns>
-        public string Productname { get; }
+        public string ProductName { get; }
 
         /// <summary>
         /// Gets the unit price of the product in the sale.

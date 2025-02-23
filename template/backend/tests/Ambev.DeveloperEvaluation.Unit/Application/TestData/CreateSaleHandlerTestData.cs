@@ -13,20 +13,18 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain
         /// <summary>
         /// Configures the Faker to generate valid CreateSaleCommand entities.
         /// The generated sale commands will have valid:
-        /// - Productname (random product names)
+        /// - ProductName (random product names)
         /// - UnitPrice (random prices)
         /// - Discount (random discount percentage)
         /// - Items (randomized sale items with quantity and price)
         /// </summary>
-        private static readonly Faker<CreateSaleCommand> createSaleHandlerFaker = new Faker<CreateSaleCommand>()
-            .RuleFor(s => s.Productname, f => f.Commerce.ProductName())
-            .RuleFor(s => s.UnitPrice, f => f.Random.Decimal(10, 100)) // UnitPrice between 10 and 100
-            .RuleFor(s => s.Discount, f => f.Random.Int(0, 30)) // Gera um desconto entre 0 e 30
+        private static readonly Faker<CreateSaleCommand> createSaleHandlerFaker = new Faker<CreateSaleCommand>()        
             .RuleFor(s => s.Items, f => f.Make(3, () => new SaleItem
             {
+                ProductName = "TesteCadastro",
                 Quantity = f.Random.Int(1, 20), // Random quantity between 1 and 20
                 UnitPrice = f.Random.Decimal(10, 100), // Random unit price between 10 and 100
-                Discount = f.Random.Decimal(0, 0.30m), // Random discount up to 30%
+                Discount = f.Random.Int(1, 20), // Random discount up to 30%
                 TotalPrice = 0 // Initialize with a placeholder, will calculate later
             }));
 
@@ -40,10 +38,12 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain
         {
             var command = createSaleHandlerFaker.Generate();
 
+            
+
             // Calculate the TotalPrice for each item dynamically based on Quantity, UnitPrice, and Discount
             foreach (var item in command.Items)
             {
-                item.TotalPrice = item.Quantity * item.UnitPrice * (1 - item.Discount); // Calculate total price with discount applied
+                item.TotalPrice = item.Quantity * item.UnitPrice * (1 - item.Discount/100); // Calculate total price with discount applied                
             }
 
             return command;

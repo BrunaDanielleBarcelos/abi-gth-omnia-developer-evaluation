@@ -8,10 +8,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales;
 
 public class CreateSaleResult
 {
+    public string? CodigoVenda { get; set; }
 
-    public Guid Id { get; set; }
-    public List<SaleItem> Items { get; set; }
-    public decimal TotalAmount { get; set; }
+    public List<SaleItem> Items { get; set; }    
 
 }
 
