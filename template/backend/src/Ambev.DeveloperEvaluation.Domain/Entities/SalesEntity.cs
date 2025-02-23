@@ -24,10 +24,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         /// </summary>
         public string IdString => Id.ToString(); // ISalesEntity interface expects a string
 
+        public string CodigoVenda { get; set; }
         /// <summary>
         /// Gets or sets the name of the product in the sale.
         /// </summary>
-        public string Productname { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the unit price of the product in the sale.
@@ -41,9 +42,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public int Discount { get; set; } = 0;
 
         /// <summary>
-        /// Gets or sets the items associated with the sale.
+        /// Gets or sets the quantity of the item being sold.
         /// </summary>
-        public List<ItemsEntity> Items { get; set; } = new List<ItemsEntity>();
+        public int Quantity { get; set; }
 
         /// <summary>
         /// Gets or sets the total amount of the sale, calculated from all items.
@@ -64,30 +65,4 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         }
     }
 
-    /// <summary>
-    /// Represents an individual item within a sale.
-    /// Contains information about quantity, unit price, discount, and total price.
-    /// </summary>
-    public class ItemsEntity
-    {
-        /// <summary>
-        /// Gets or sets the quantity of the item being sold.
-        /// </summary>
-        public int Quantity { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unit price of the item.
-        /// </summary>
-        public decimal UnitPrice { get; set; }
-
-        /// <summary>
-        /// Gets or sets the discount applied to the item as a decimal (percentage).
-        /// </summary>
-        public decimal Discount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the total price of the item after applying the discount and multiplying by quantity.
-        /// </summary>
-        public decimal TotalPrice { get; set; }
-    }
 }

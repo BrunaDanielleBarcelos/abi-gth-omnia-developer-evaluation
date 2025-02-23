@@ -21,7 +21,7 @@ public interface ISalesRepository
     /// <param name="id">The unique identifier of the sale</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The sale if found, null otherwise</returns>
-    Task<SalesEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<SalesEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a sale by its product name
@@ -37,5 +37,5 @@ public interface ISalesRepository
     /// <param name="id">The unique identifier of the sale to delete</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the sale was deleted, false if not found</returns>
-    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
 }
