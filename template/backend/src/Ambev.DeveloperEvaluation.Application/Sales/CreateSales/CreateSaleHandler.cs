@@ -25,6 +25,11 @@ namespace Ambev.DeveloperEvaluation.Application.Sales
         // Handler to process the sale creation
         public async Task<CreateSaleResult> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
         {
+            if (request.Items == null || !request.Items.Any())
+            {
+                throw new FluentValidation.ValidationException("Items cannot be null or empty.");
+            }
+
             // Applying quantity rules and discount calculation for each item
             foreach (var item in request.Items)
             {

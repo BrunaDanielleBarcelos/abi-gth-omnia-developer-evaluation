@@ -21,7 +21,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain
         private static readonly Faker<CreateSaleCommand> createSaleHandlerFaker = new Faker<CreateSaleCommand>()
             .RuleFor(s => s.Productname, f => f.Commerce.ProductName())
             .RuleFor(s => s.UnitPrice, f => f.Random.Decimal(10, 100)) // UnitPrice between 10 and 100
-            .RuleFor(s => s.Discount, f => f.Random.Decimal(0, 0.30m)) // Discount up to 30%
+            .RuleFor(s => s.Discount, f => f.Random.Int(0, 30)) // Gera um desconto entre 0 e 30
             .RuleFor(s => s.Items, f => f.Make(3, () => new SaleItem
             {
                 Quantity = f.Random.Int(1, 20), // Random quantity between 1 and 20
